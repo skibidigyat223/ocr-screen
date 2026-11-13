@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+IMG="/tmp/vn-ocr.png"
+PRE="/tmp/vn-ocr-pre.png"
+
+# pilih area
+AREA=$(slurp)
+
+if [ -z "$AREA" ]; then
+    exit 1
+fi
+
+# screenshot
+grim -g "$AREA" "$IMG"
+
+# preprocessing
+magick "$IMG" \
+    -resize 400% \
+    -colorspace Gray \
+    -sharpen 0x1 \
+    "$PRE"
+
+TEXT=$(tesseract "$PRE" stdout --psm 6 -l eng)
+
+echo "$TEXT" | wl-copy
+
+notify-send "VN OCR" "$TEXT"
